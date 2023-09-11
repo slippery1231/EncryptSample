@@ -14,11 +14,9 @@ var excelFilePath = "D:\\self-Practice\\BackEnd\\EncryptSample\\EncryptSample\\E
 var pdfFolderPath = "D:\\self-Practice\\BackEnd\\EncryptSample\\EncryptSample\\FileContainer";
 
 var package = new ExcelPackage(new FileInfo(excelFilePath));
-
-//假設Excel文件的第一個工作表包含姓名和密碼
 var worksheet = package.Workbook.Worksheets[0];
 
-//從第二行開始，(第一行是標題
+//excel內容會從第二行開始，(第一行是標題)
 for (var row = 2; row <= worksheet?.Dimension.End.Row; row++)
 {
     //姓名
@@ -27,23 +25,30 @@ for (var row = 2; row <= worksheet?.Dimension.End.Row; row++)
     //要設定的密碼
     var password = worksheet.Cells[row, 2].Value.ToString();
 
-    //假設PDF文件名與姓名對應
+    //PDF文件名與姓名對應
     var pdfFilePath = Path.Combine(pdfFolderPath, $"{name}.pdf");
 
+    //output
+    var outPutFilePath = "D:\\self-Practice\\BackEnd\\EncryptSample\\EncryptSample\\Output";
+    var outPutFileName = Path.Combine(outPutFilePath, $"{name}.pdf");
     //加密
     if (password != null)
     {
-        EncryptPdf(pdfFilePath, pdfFilePath, password);
+        EncryptPdf(pdfFilePath, outPutFileName, password);
     }
+
+    Console.WriteLine("執行成功，檔案已加密完成");
+    Console.ReadLine();
 }
 
 static void EncryptPdf(string inputPdfPath, string outputPdfPath, string password)
 {
     using (var reader = new PdfReader(inputPdfPath))
     {
-        using (var fs = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
+        using (var fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
         {
-            using (var stamper = new PdfStamper(reader, fs))
+            // PdfEncryptor.Encrypt(reader, fileStream, true, password, password, PdfWriter.ALLOW_PRINTING);
+            using (var stamper = new PdfStamper(reader, fileStream))
             {
                 stamper.SetEncryption(
                     Encoding.ASCII.GetBytes(password), // 轉換密碼為位元組
@@ -52,5 +57,7 @@ static void EncryptPdf(string inputPdfPath, string outputPdfPath, string passwor
                     PdfWriter.ENCRYPTION_AES_128); // 使用AES 128位元加密
             }
         }
+
+        reader.Close();
     }
 }
