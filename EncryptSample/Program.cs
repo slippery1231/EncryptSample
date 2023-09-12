@@ -4,6 +4,14 @@ using EncryptSample;
 using iTextSharp.text.pdf;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
+using Serilog;
+
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("Log/log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
 //非商業使用，如果沒加這行會被擋下來
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -11,18 +19,20 @@ ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 //取得config設定
 var fileConfig = GetConfig();
 
-//取得excel路徑
-var excelFilePath = fileConfig.ExcelFilePath;
+
 
 //取得pdf路徑
 var pdfFolderPath = fileConfig.PdfFilePath;
 
+//處理excel
+var excelFilePath = fileConfig.ExcelFilePath;
 var package = new ExcelPackage(new FileInfo(excelFilePath));
 var worksheet = package.Workbook.Worksheets[0];
 
 //excel內容會從第二行開始，(第一行是標題)
 for (var row = 2; row <= worksheet?.Dimension.End.Row; row++)
 {
+    Log.Information($"開始執行第{row - 1}筆");
     //姓名
     var name = worksheet.Cells[row, 1].Value.ToString();
 
@@ -41,13 +51,12 @@ for (var row = 2; row <= worksheet?.Dimension.End.Row; row++)
         EncryptPdf(pdfFilePath, outPutFileName, password);
     }
 
-    Console.WriteLine($"第{row - 1}筆已執行完成");
+    Log.Information($"第{row - 1}筆已執行完成");
 }
 
-Console.WriteLine("執行成功，檔案已全部加密完成");
-Console.WriteLine("請按任意鍵關閉視窗");
+Log.Information("執行成功，檔案已全部加密完成");
+Log.Information("請按任意鍵關閉視窗");
 Console.ReadLine();
-
 static void EncryptPdf(string inputPdfPath, string outputPdfPath, string password)
 {
     var reader = new PdfReader(inputPdfPath);
