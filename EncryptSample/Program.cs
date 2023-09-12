@@ -33,7 +33,7 @@ for (var row = 2; row <= worksheet?.Dimension.End.Row; row++)
     var pdfFilePath = Path.Combine(pdfFolderPath, $"{name}.pdf");
 
     //output
-    var outPutFilePath = "D:\\self-Practice\\BackEnd\\EncryptSample\\EncryptSample\\Output";
+    var outPutFilePath = fileConfig.OutputFilePath;
     var outPutFileName = Path.Combine(outPutFilePath, $"{name}.pdf");
     //加密
     if (password != null)
@@ -62,7 +62,7 @@ FileConfig GetConfig()
     var config = new ConfigurationBuilder()
         .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
         .Build();
-    var fileConfig1 = new FileConfig();
-    config.Bind("FileConfig", fileConfig1);
-    return fileConfig1;
+    var fConfig = new FileConfig();
+    config.Bind("FileConfig", fConfig);
+    return fConfig;
 }
