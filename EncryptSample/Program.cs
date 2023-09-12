@@ -1,16 +1,21 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using EncryptSample;
 using iTextSharp.text.pdf;
+using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 
 //非商業使用，如果沒加這行會被擋下來
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
+//取得config設定
+var fileConfig = GetConfig();
+
 //取得excel路徑
-var excelFilePath = "D:/self-Practice/BackEnd/EncryptSample/EncryptSample/ExcelContainer/NameAndPassword.xlsx";
+var excelFilePath = fileConfig.ExcelFilePath;
 
 //取得pdf路徑
-var pdfFolderPath = "D:/self-Practice/BackEnd/EncryptSample/EncryptSample/FileContainer";
+var pdfFolderPath = fileConfig.PdfFilePath;
 
 var package = new ExcelPackage(new FileInfo(excelFilePath));
 var worksheet = package.Workbook.Worksheets[0];
@@ -50,4 +55,14 @@ static void EncryptPdf(string inputPdfPath, string outputPdfPath, string passwor
     PdfEncryptor.Encrypt(reader, fileStream, true, password, password, PdfWriter.ALLOW_PRINTING);
 
     reader.Close();
+}
+
+FileConfig GetConfig()
+{
+    var config = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        .Build();
+    var fileConfig1 = new FileConfig();
+    config.Bind("FileConfig", fileConfig1);
+    return fileConfig1;
 }
