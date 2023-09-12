@@ -1,6 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Text;
 using iTextSharp.text.pdf;
 using OfficeOpenXml;
 
@@ -8,10 +7,10 @@ using OfficeOpenXml;
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 //取得excel路徑
-var excelFilePath = "D:\\self-Practice\\BackEnd\\EncryptSample\\EncryptSample\\ExcelContainer\\NameAndPassword.xlsx";
+var excelFilePath = "D:/self-Practice/BackEnd/EncryptSample/EncryptSample/ExcelContainer/NameAndPassword.xlsx";
 
 //取得pdf路徑
-var pdfFolderPath = "D:\\self-Practice\\BackEnd\\EncryptSample\\EncryptSample\\FileContainer";
+var pdfFolderPath = "D:/self-Practice/BackEnd/EncryptSample/EncryptSample/FileContainer";
 
 var package = new ExcelPackage(new FileInfo(excelFilePath));
 var worksheet = package.Workbook.Worksheets[0];
@@ -37,27 +36,18 @@ for (var row = 2; row <= worksheet?.Dimension.End.Row; row++)
         EncryptPdf(pdfFilePath, outPutFileName, password);
     }
 
-    Console.WriteLine("執行成功，檔案已加密完成");
-    Console.ReadLine();
+    Console.WriteLine($"第{row - 1}筆已執行完成");
 }
+
+Console.WriteLine("執行成功，檔案已全部加密完成");
+Console.WriteLine("請按任意鍵關閉視窗");
+Console.ReadLine();
 
 static void EncryptPdf(string inputPdfPath, string outputPdfPath, string password)
 {
-    using (var reader = new PdfReader(inputPdfPath))
-    {
-        using (var fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
-        {
-            // PdfEncryptor.Encrypt(reader, fileStream, true, password, password, PdfWriter.ALLOW_PRINTING);
-            using (var stamper = new PdfStamper(reader, fileStream))
-            {
-                stamper.SetEncryption(
-                    Encoding.ASCII.GetBytes(password), // 轉換密碼為位元組
-                    Encoding.ASCII.GetBytes(password),
-                    PdfWriter.ALLOW_PRINTING, // 允許列印
-                    PdfWriter.ENCRYPTION_AES_128); // 使用AES 128位元加密
-            }
-        }
+    var reader = new PdfReader(inputPdfPath);
+    var fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write);
+    PdfEncryptor.Encrypt(reader, fileStream, true, password, password, PdfWriter.ALLOW_PRINTING);
 
-        reader.Close();
-    }
+    reader.Close();
 }
